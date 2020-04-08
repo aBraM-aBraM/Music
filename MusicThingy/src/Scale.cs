@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MusicThingy
 {
     class Scale
     {
-        public enum Type { MAJOR, MINOR, PENTATONIC_MINOR, PENTATONIC_MAJOR}
+        public enum Type { MAJOR, MINOR, PENTATONIC_MINOR, PENTATONIC_MAJOR }
         int rootMinimum;
         readonly int formula;
 
@@ -24,7 +23,7 @@ namespace MusicThingy
         /// </summary>
         /// <param name="root">Designated root note of the scale</param>
         /// <param name="formula">The scale's formula string of levels on the chromatic scale ; 1 = root (0-10) | MAJOR | 0,2,4,5,7,9,11 </param>
-        public  Scale(string root, string formula)
+        public Scale(string root, string formula)
         {
             Initialize(root, formula);
         }

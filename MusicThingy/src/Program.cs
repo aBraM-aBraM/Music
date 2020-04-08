@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Collections.Generic;
+﻿using MusicThingy.src;
 
 namespace MusicThingy
 {
@@ -9,7 +7,8 @@ namespace MusicThingy
         static void Main(string[] args)
         {
             Scale scale = new Scale("c", Scale.Type.PENTATONIC_MAJOR);
-            SoundManager.Improvise(scale, 95);
+            SoundPlayer.currentScale = scale;
+            SoundPlayer.Play();
             
             //Console.Beep(SoundManager.GetNoteFreq(aMinor.notes[0]), 10000);
         }

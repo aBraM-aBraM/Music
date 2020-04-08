@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MusicThingy
 {
@@ -10,39 +8,9 @@ namespace MusicThingy
         // lowest note
         const float cMinimum = 65.41f;
         // default octave
-        const int defaultOctave = 3;
+        public const int defaultOctave = 3;
         // random for improvising
         static Random rnd = new Random();
-
-
-        public static void Improvise(Scale scale, int bpm)
-        {
-            Console.CursorVisible = false;
-
-            int currentOctave = 3;
-            int differenceMS = (int)(1000 * 60 / (float)bpm);
-            DateTime future = DateTime.Now.AddMilliseconds(differenceMS);
-            while (true)
-            {
-                if(future <= DateTime.Now)
-                {
-                    future = DateTime.Now.AddMilliseconds(differenceMS);
-
-                    // calculate improv note
-                    string currentNote = scale.notes[rnd.Next(0, scale.notes.Length)];
-                    int currentNoteFreq = GetNoteFreq(currentNote, currentOctave);
-
-                    // display note
-                    Console.SetCursorPosition(50, 14);
-                    Console.WriteLine("                 ");
-                    Console.SetCursorPosition(50, 14);
-                    Console.WriteLine(currentNote);
-
-                    // play sound
-                    Console.Beep(currentNoteFreq, 100);
-                }
-            }
-        }
 
         /// <summary>
         /// Return frequency of a given note
@@ -51,7 +19,7 @@ namespace MusicThingy
         /// <param name="octave">Octave of choice</param>
         public static int GetNoteFreq(int index, int octave = defaultOctave)
         {
-            return (int)(cMinimum * Math.Pow(2,(12*(float)octave + index - 1)/12));
+            return (int)(cMinimum * Math.Pow(2, (12 * (float)octave + index - 1) / 12));
         }
         /// <summary>
         /// Return frequency of a given note
@@ -94,7 +62,7 @@ namespace MusicThingy
                 N = 11;
             }
 
-            if(note.Length > 1 && note[1] == '#')
+            if (note.Length > 1 && note[1] == '#')
             {
                 N++;
             }
@@ -149,8 +117,8 @@ namespace MusicThingy
             N += interval;
             N -= (N / 12) * 12;
 
-            return(NoteNameByLevel(N));
-            
+            return (NoteNameByLevel(N));
+
         }
         /// <summary>
         /// Returns note's name by it's level on the chromatic scale
