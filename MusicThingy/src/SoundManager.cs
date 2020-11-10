@@ -4,7 +4,7 @@ namespace MusicThingy
 {
     static class SoundManager
     {
-
+        public enum ChordType { Major, Minor}
         // lowest note
         const float cMinimum = 65.41f;
         // default octave
@@ -68,6 +68,11 @@ namespace MusicThingy
             }
 
             return (int)(cMinimum * Math.Pow(2, (float)(12 * octave + N) / 12));
+        }
+       
+        public static int GetChordFreq(string root, ChordType chordType)
+        {
+            return 0;
         }
         /// <summary>
         /// Get the name of a note by it's relatives

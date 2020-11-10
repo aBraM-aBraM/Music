@@ -6,8 +6,9 @@ namespace MusicThingy
     {
         static void Main(string[] args)
         {
-            Scale scale = new Scale("c", Scale.Type.PENTATONIC_MAJOR);
+            Scale scale = new Scale("e", Scale.ScaleType.PENTATONIC_MINOR);
             SoundPlayer.currentScale = scale;
+            SoundPlayer.bpm = 180;
             SoundPlayer.Play();
             
             //Console.Beep(SoundManager.GetNoteFreq(aMinor.notes[0]), 10000);

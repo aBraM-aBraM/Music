@@ -5,9 +5,16 @@ namespace MusicThingy
 {
     class Scale
     {
-        public enum Type { MAJOR, MINOR, PENTATONIC_MINOR, PENTATONIC_MAJOR }
-        int rootMinimum;
-        readonly int formula;
+        public enum ScaleType { MAJOR, MINOR, PENTATONIC_MINOR, PENTATONIC_MAJOR }
+
+        private Dictionary<ScaleType, string> formulaDict = new Dictionary<ScaleType, string>()
+        {   { ScaleType.MAJOR , "0,2,4,5,7,9,11"},
+            { ScaleType.MINOR, "0,2,3,5,7,8,10"},
+            { ScaleType.PENTATONIC_MINOR, "0,3,5,7,10" },
+            { ScaleType.PENTATONIC_MAJOR, "0,4,5,7,11" } 
+        };
+        private int rootMinimum;
+        private readonly int formula;
 
         List<string> _notes = new List<string>();
         public string[] notes
@@ -33,23 +40,9 @@ namespace MusicThingy
         /// </summary>
         /// <param name="root">Designated root note of the scale</param>
         /// <param name="scaleType">Type of the scale from known types</param>
-        public Scale(string root, Type scaleType = Type.MAJOR)
+        public Scale(string root, ScaleType scaleType = ScaleType.MAJOR)
         {
-            switch (scaleType)
-            {
-                case Type.MAJOR:
-                    Initialize(root, "0,2,4,5,7,9,11");
-                    return;
-                case Type.MINOR:
-                    Initialize(root, "0,2,3,5,7,8,10");
-                    return;
-                case Type.PENTATONIC_MINOR:
-                    Initialize(root, "0,3,5,7,10");
-                    return;
-                case Type.PENTATONIC_MAJOR:
-                    Initialize(root, "0,4,5,7,11");
-                    return;
-            }
+            Initialize(root, formulaDict[scaleType]);
         }
 
         /// <summary>
