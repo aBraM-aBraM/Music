@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Threading;
 
 namespace MusicThingy.src
 {
     static class SoundPlayer
     {
+
+        static Thread backtrack; 
+
         /// <summary>Current scale</summary>
         public static Scale currentScale;
         /// <summary>Current octave, natural number </summary> 
@@ -13,7 +17,7 @@ namespace MusicThingy.src
         /// <summary>Current State of the player, default = true</summary>
         public static bool IsPlaying = true;
         /// <summary>
-        /// The intervals in milliseconds between every occur of sound 
+        /// The intervals in milliseconds between every occurence of sound 
         /// </summary>
         static int difference
         {
@@ -30,6 +34,36 @@ namespace MusicThingy.src
         /// </summary>
         public static void Play()
         {
+            DateTime future = DateTime.Now.AddMilliseconds(difference);
+
+            while (IsPlaying)
+            {
+                if (DateTime.Now >= future)
+                {
+                    future = DateTime.Now.AddMilliseconds(difference);
+
+                    // calculate improv note
+                    string currentNote = currentScale.notes[rnd.Next(0, currentScale.notes.Length)];
+                    int currentNoteFreq = SoundManager.GetNoteFreq(currentNote, currentOctave);
+
+                    // UI Display of note
+                    Console.SetCursorPosition(50, 14);
+                    Console.WriteLine("  ");
+                    Console.SetCursorPosition(50, 14);
+                    Console.WriteLine(currentNote);
+
+                    // play a sound
+                    Console.Beep(currentNoteFreq, 100);
+                }
+            }
+        }
+
+        public static void LoopBackingTrack251()
+        {
+            int[] chords = new int[] {
+                SoundManager.GetChordFreq("a", SoundManager.ChordType.Minor),       
+            };
+
             DateTime future = DateTime.Now.AddMilliseconds(difference);
 
             while (IsPlaying)

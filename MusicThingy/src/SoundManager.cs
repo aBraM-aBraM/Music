@@ -1,10 +1,21 @@
-﻿using System;
+﻿using MusicThingy.src;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MusicThingy
 {
     static class SoundManager
     {
-        public enum ChordType { Major, Minor}
+        public enum ChordType { Major, Minor, Seven, MajorSeven, MinorSeven}
+        static Dictionary<ChordType, string> chordIntervals = new Dictionary<ChordType, string>()
+        {
+            {ChordType.Major, "0,4,7" },
+            {ChordType.Minor, "0,3,7" },
+            {ChordType.Seven , "0,4,7,10" },
+            {ChordType.MajorSeven, "0,4,7,11" },
+            {ChordType.MinorSeven, "0,3,7,10" }
+        };
         // lowest note
         const float cMinimum = 65.41f;
         // default octave
@@ -26,7 +37,7 @@ namespace MusicThingy
         /// </summary>
         /// <param name="note">Musical Note: 'name' + (null/#) </param>
         /// <param name="octave">Octave of choice</param>
-        public static int GetNoteFreq(string note, int octave = defaultOctave)
+        public static int GetNoteFreq(string note, int octave = defaultOctave, int offset = 0)
         {
             if (note.Length > 2 || note.Length < 1) throw new Exception("Syntax Error: note = 'char' + (null/#)");
 
@@ -67,12 +78,32 @@ namespace MusicThingy
                 N++;
             }
 
+            N += offset;
+
             return (int)(cMinimum * Math.Pow(2, (float)(12 * octave + N) / 12));
         }
-       
-        public static int GetChordFreq(string root, ChordType chordType)
+       /// <summary>
+       /// Returns frequency of the chord as one note (frequency differences of notes)
+       /// </summary>
+       /// <param name="root"></param>
+       /// <param name="chordType"></param>
+       /// <param name="octave"></param>
+       /// <returns></returns>
+        public static int GetChordFreq(string root, ChordType chordType, int octave = defaultOctave)
         {
-            return 0;
+            int chordFreq = 0;
+            // array to store each of the chord's notes' frequencies
+            int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
+            chordFreq = GetNoteFreq(root, octave);
+            //Console.Beep(chordFreq,200);
+            for (int i = 1; i < intervals.Length; i++)
+            {
+                int tmp = GetNoteFreq(root, octave, intervals[i]);
+              //  Console.Beep(tmp,200);
+                chordFreq = Math.Abs(chordFreq - tmp);
+            }
+            //Console.Beep(chordFreq, 200);
+            return chordFreq;
         }
         /// <summary>
         /// Get the name of a note by it's relatives
