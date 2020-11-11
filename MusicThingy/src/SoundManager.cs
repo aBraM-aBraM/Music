@@ -9,6 +9,7 @@ namespace MusicThingy
     static class SoundManager
     {
         public enum ChordType { Major, Minor, Seven, MajorSeven, MinorSeven, HalfDiminshed}
+        public enum ScaleType { MAJOR, MINOR, PENTATONIC_MINOR, PENTATONIC_MAJOR }
         static Dictionary<ChordType, string> chordIntervals = new Dictionary<ChordType, string>()
         {
             {ChordType.Major, "0,4,7" },
@@ -17,6 +18,12 @@ namespace MusicThingy
             {ChordType.MajorSeven, "0,4,7,11" },
             {ChordType.MinorSeven, "0,3,7,10" },
             {ChordType.HalfDiminshed, "0,3,7,10" }
+        };
+        static Dictionary<ScaleType, string> scaleIntervals = new Dictionary<ScaleType, string>()
+        {   { ScaleType.MAJOR , "0,2,4,5,7,9,11"},
+            { ScaleType.MINOR, "0,2,3,5,7,8,10"},
+            { ScaleType.PENTATONIC_MINOR, "0,3,5,7,10" },
+            { ScaleType.PENTATONIC_MAJOR, "0,4,5,7,11" }
         };
 
         public static readonly string[] AutumnLeaves = { "am7","d7", "gmaj7","cmaj7","f#m7b5","b7","em","e7" };
@@ -146,7 +153,7 @@ namespace MusicThingy
             return chordFreq;
         }
         /// <summary>
-        /// Return list of note frequencies of the chord's notes
+        /// Return an array of note frequencies of the chord's notes
         /// </summary>
         /// <param name="rootFreq"></param>
         /// <param name="chordType"></param>
@@ -154,9 +161,8 @@ namespace MusicThingy
         /// <returns></returns>
         public static int[] GetChordNotesFreq(int rootFreq, ChordType chordType, int octave = defaultOctave)
         {
-            // array to store each of the chord's notes' frequencies
+            // array to store each of the chord's notes' intervals and override with note frequencies
             int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
-            Console.WriteLine(string.Join(",", intervals));
             intervals[0] = rootFreq;
             for (int i = 1; i < intervals.Length; i++)
             {
@@ -165,91 +171,34 @@ namespace MusicThingy
             return intervals;
         }
         /// <summary>
-        /// Get the name of a note by it's relatives
+        /// Return an array of note frequencies of the scale's notes using note name
+        /// utilizing GetScaleNotesFreq(int, ScaleType, int)
         /// </summary>
-        /// <param name="note">Musical Note: 'name' + (null/#) </param>
-        /// <param name="interval">Interval (difference) from current note. Natural number</param>
+        /// <param name="root"></param>
+        /// <param name="scaleType"></param>
+        /// <param name="octave"></param>
         /// <returns></returns>
-        public static string GetNoteName(string note, int interval)
+        public static int[] GetScaleNotesFreq(string root, ScaleType scaleType, int octave = defaultOctave)
         {
-            if (note.Length > 2 || note.Length < 1) throw new Exception("Syntax Error: note = 'char' + (null/#)");
-
-            // number of half steps forward from cMinimum
-            int N = 0;
-
-            if (note[0] == 'c' || note[0] == 'C')
-            {
-                N = 0;
-            }
-            if (note[0] == 'd' || note[0] == 'D')
-            {
-                N = 2;
-            }
-            if (note[0] == 'e' || note[0] == 'E')
-            {
-                N = 4;
-            }
-            if (note[0] == 'f' || note[0] == 'F')
-            {
-                N = 5;
-            }
-            if (note[0] == 'g' || note[0] == 'G')
-            {
-                N = 7;
-            }
-            if (note[0] == 'a' || note[0] == 'A')
-            {
-                N = 9;
-            }
-            if (note[0] == 'b' || note[0] == 'B')
-            {
-                N = 11;
-            }
-            if (note.Length > 1 && note[1] == '#')
-            {
-                N++;
-            }
-            N += interval;
-            N -= (N / 12) * 12;
-
-            return (NoteNameByLevel(N));
-
+           return GetScaleNotesFreq(GetNoteFreq(root), scaleType, defaultOctave);
         }
         /// <summary>
-        /// Returns note's name by it's level on the chromatic scale
+        /// Return an array of note frequencies of the scale's notes using frequencies
         /// </summary>
-        /// <param name="index">The index on the chromatic scale</param>
-        public static string NoteNameByLevel(int index)
+        /// <param name="rootFreq"></param>
+        /// <param name="scaleType"></param>
+        /// <param name="octave"></param>
+        /// <returns></returns>
+        public static int[] GetScaleNotesFreq(int rootFreq, ScaleType scaleType, int octave = defaultOctave)
         {
-            switch (index)
+            // array to store each of the scale's notes' intervals and override with scale notes frequencies
+            int[] intervals = scaleIntervals[scaleType].Split(",").Select(Int32.Parse).ToArray();
+            intervals[0] = rootFreq;
+            for (int i = 1; i < intervals.Length; i++)
             {
-                case 0:
-                    return "c";
-                case 1:
-                    return "c#";
-                case 2:
-                    return "d";
-                case 3:
-                    return "d#";
-                case 4:
-                    return "e";
-                case 5:
-                    return "f";
-                case 6:
-                    return "f#";
-                case 7:
-                    return "g";
-                case 8:
-                    return "g#";
-                case 9:
-                    return "a";
-                case 10:
-                    return "a#";
-                case 11:
-                    return "b";
-                default:
-                    return "h";
+                intervals[i] = GetOffsetFreq(rootFreq, octave, intervals[i]);
             }
+            return intervals;
         }
     }
 }
