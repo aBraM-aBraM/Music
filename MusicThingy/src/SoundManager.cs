@@ -21,6 +21,7 @@ namespace MusicThingy
 
         public static readonly string[] AutumnLeaves = { "am7","d7", "gmaj7","cmaj7","f#m7b5","b7","em","e7" };
         public static readonly string[] Blues = { "a7","a7", "a7","a7","d7","d7","a7","a7","e7","d7","a7","e7"};
+        public static readonly string[] SimpleCMaj = { "c", "am", "f", "g" };
 
         // lowest note
         const float cMinimum = 65.41f;
@@ -107,7 +108,7 @@ namespace MusicThingy
             if (chord.Length > 6 || chord.Length < 1) throw new SyntaxErrorException("chord = 'char' + (null/#) + (null/maj7,m7,m7b5,7,m)");
 
             int rootFreq = 0;
-            if (chord[1] == '#')
+            if (chord.Length > 1 && chord[1] == '#')
             {
                 rootFreq = GetNoteFreq(chord[0].ToString() + chord[1].ToString());
             }
@@ -133,17 +134,35 @@ namespace MusicThingy
         public static int GetChordFreq(int rootFreq, ChordType chordType, int octave = defaultOctave)
         {
             int chordFreq = 0;
-            // array to store each of the chord's notes' frequencies
+            // array to store each of the chord's notes' intervals
             int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
+            Console.WriteLine(string.Join(",",intervals));
             chordFreq = rootFreq;
-            //Console.Beep(chordFreq,200);
             for (int i = 1; i < intervals.Length; i++)
             {
                 int tmp = GetOffsetFreq(rootFreq, octave, intervals[i]);
-                //Console.Beep(tmp,200);
                 chordFreq = Math.Abs(chordFreq - tmp);
             }
             return chordFreq;
+        }
+        /// <summary>
+        /// Return list of note frequencies of the chord's notes
+        /// </summary>
+        /// <param name="rootFreq"></param>
+        /// <param name="chordType"></param>
+        /// <param name="octave"></param>
+        /// <returns></returns>
+        public static int[] GetChordNotesFreq(int rootFreq, ChordType chordType, int octave = defaultOctave)
+        {
+            // array to store each of the chord's notes' frequencies
+            int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
+            Console.WriteLine(string.Join(",", intervals));
+            intervals[0] = rootFreq;
+            for (int i = 1; i < intervals.Length; i++)
+            {
+                intervals[i] = GetOffsetFreq(rootFreq, octave, intervals[i]);
+            }
+            return intervals;
         }
         /// <summary>
         /// Get the name of a note by it's relatives

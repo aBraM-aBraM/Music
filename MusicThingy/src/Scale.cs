@@ -14,7 +14,6 @@ namespace MusicThingy
             { ScaleType.PENTATONIC_MAJOR, "0,4,5,7,11" } 
         };
         private int rootMinimum;
-        private readonly int formula;
 
         List<string> _notes = new List<string>();
         public string[] notes

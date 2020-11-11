@@ -6,7 +6,7 @@ namespace MusicThingy.src
     static class SoundPlayer
     {
 
-        static Thread backtrack; 
+        public static Thread backtrack = new Thread(() => LoopTrack(SoundManager.SimpleCMaj));
 
         /// <summary>Current scale</summary>
         public static Scale currentScale;
@@ -57,6 +57,13 @@ namespace MusicThingy.src
                 }
             }
         }
+        public static void PlayNotes(int[] notes)
+        {
+            foreach (int note in notes)
+            {
+                Console.Beep(note, 200);
+            }
+        }
 
         public static void LoopTrack(string[] chords, int barLen = 4)
         {
@@ -73,7 +80,7 @@ namespace MusicThingy.src
 
                     // UI Display of note
                     Console.SetCursorPosition(50, 14);
-                    Console.WriteLine("  ");
+                    Console.WriteLine("         ");
                     Console.SetCursorPosition(50, 14);
                     Console.WriteLine(chords[index]);
 
@@ -91,7 +98,7 @@ namespace MusicThingy.src
 
 
                     // play a sound
-                    Console.Beep(currentNoteFreq, 100);
+                    Console.Beep(currentNoteFreq, 500);
                 }
             }
         }
