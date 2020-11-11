@@ -8,6 +8,8 @@ namespace MusicThingy
     {
         static void Main(string[] args)
         {
+            var scale = SoundManager.GetScaleNotesFreq("c", SoundManager.ScaleType.MAJOR);
+            SoundPlayer.PlayNotes(scale);
         }
 
     }

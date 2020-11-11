@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 
 namespace MusicThingy.src
@@ -6,34 +7,22 @@ namespace MusicThingy.src
     static class SoundPlayer
     {
 
-        public static Thread backtrack = new Thread(() => LoopTrack(SoundManager.SimpleCMaj));
-
-        /// <summary>Current scale</summary>
-        public static Scale currentScale;
         /// <summary>Current octave, natural number </summary> 
         public static int currentOctave = SoundManager.defaultOctave;
-        /// <summary>Beats per minute</summary>
-        public static int bpm = 90;
         /// <summary>Current State of the player, default = true</summary>
         public static bool IsPlaying = true;
         /// <summary>
         /// The intervals in milliseconds between every occurence of sound 
         /// </summary>
-        static int difference
-        {
-            get
-            {
-                return (int)(1000 * 60 / (float)bpm);
-            }
-        }
         static Random rnd = new Random();
 
 
         /// <summary>
         /// Improvising on the current scale and octave
         /// </summary>
-        public static void Play()
+        public static void Improv(int[] scaleNoteFreqs, int bpm)
         {
+            int difference = Difference(bpm);
             DateTime future = DateTime.Now.AddMilliseconds(difference);
 
             while (IsPlaying)
@@ -42,9 +31,8 @@ namespace MusicThingy.src
                 {
                     future = DateTime.Now.AddMilliseconds(difference);
 
-                    // calculate improv note
-                    string currentNote = currentScale.notes[rnd.Next(0, currentScale.notes.Length)];
-                    int currentNoteFreq = SoundManager.GetNoteFreq(currentNote, currentOctave);
+                    // generate improv note
+                    int currentNote = scaleNoteFreqs[rnd.Next(0, scaleNoteFreqs.Length)];
 
                     // UI Display of note
                     Console.SetCursorPosition(50, 14);
@@ -53,7 +41,7 @@ namespace MusicThingy.src
                     Console.WriteLine(currentNote);
 
                     // play a sound
-                    Console.Beep(currentNoteFreq, 100);
+                    Console.Beep(currentNote, 100);
                 }
             }
         }
@@ -64,10 +52,9 @@ namespace MusicThingy.src
                 Console.Beep(note, 200);
             }
         }
-
-        public static void LoopTrack(string[] chords, int barLen = 4)
+        public static void LoopTrack(string[] chords, int bpm, int barLen = 4)
         {
-
+            int difference = Difference(bpm);
             int index = 0;
             int counter = barLen;
             DateTime future = DateTime.Now.AddMilliseconds(difference);
@@ -102,5 +89,13 @@ namespace MusicThingy.src
                 }
             }
         }
+
+        // Utility Methods
+
+        /// <summary>
+        /// Returns the difference in seconds between every beat from bpm
+        /// </summary>
+        /// <returns></returns>
+        private static int Difference(int bpm) => (int)(1000 * 60 / (float)bpm);
     }
 }
