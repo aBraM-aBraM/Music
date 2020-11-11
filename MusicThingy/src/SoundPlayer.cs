@@ -58,12 +58,11 @@ namespace MusicThingy.src
             }
         }
 
-        public static void LoopBackingTrack251()
+        public static void LoopTrack(string[] chords, int barLen = 4)
         {
-            int[] chords = new int[] {
-                SoundManager.GetChordFreq("a", SoundManager.ChordType.Minor),       
-            };
 
+            int index = 0;
+            int counter = barLen;
             DateTime future = DateTime.Now.AddMilliseconds(difference);
 
             while (IsPlaying)
@@ -72,15 +71,24 @@ namespace MusicThingy.src
                 {
                     future = DateTime.Now.AddMilliseconds(difference);
 
-                    // calculate improv note
-                    string currentNote = currentScale.notes[rnd.Next(0, currentScale.notes.Length)];
-                    int currentNoteFreq = SoundManager.GetNoteFreq(currentNote, currentOctave);
-
                     // UI Display of note
                     Console.SetCursorPosition(50, 14);
                     Console.WriteLine("  ");
                     Console.SetCursorPosition(50, 14);
-                    Console.WriteLine(currentNote);
+                    Console.WriteLine(chords[index]);
+
+
+                    if (counter == 0)
+                    {
+                        index++;
+                        if (index == chords.Length) index = 0;
+                        counter = barLen;
+                    }
+                    // calculate improv note
+                    int currentNoteFreq = SoundManager.GetChordFreq(chords[index]);
+                   
+                    counter--;
+
 
                     // play a sound
                     Console.Beep(currentNoteFreq, 100);
