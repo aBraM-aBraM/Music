@@ -33,6 +33,7 @@ Scale Iteration Playing
 ```
 This code will play every note of the C Major Scale.
 
+
 Improvisation
 ```sh
 > int[] myScale = SoundManager.GetScaleNotesFreq("c", SoundManager.ScaleType.MAJOR);
@@ -41,6 +42,7 @@ Improvisation
 ```
 This code will generate randomized improvisation at `120` beats per minute over the scale of C Major.
 
+
 Custom Backing Tracks
 ```sh
 > SoundPlayer.LoopTrack(new string[]{"c","am","f","g"}, 100, 3);
@@ -48,11 +50,13 @@ Custom Backing Tracks
 This code will generate a backing track using the chords from the string array (c major, a minor, f major, g major) 
 with `3` beats in every bar at `100` bpm
 
+
 Using Existing Backing Tracks
 ```sh
 > SoundPlayer.LoopTrack(SoundManager.AutumnLeaves, 120);
 ```
 This code is using some of SoundManager's existing soundtracks (Autumn Leaves) at a bpm of `120`.
+
 
 For further explanation there's documentation on every function ;)
 Thank you for using my tool and contributing!
