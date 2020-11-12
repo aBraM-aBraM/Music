@@ -8,8 +8,12 @@ namespace MusicThingy
     {
         static void Main(string[] args)
         {
-            var scale = SoundManager.GetScaleNotesFreq("c", SoundManager.ScaleType.MAJOR);
-            SoundPlayer.PlayNotes(scale);
+            var a = SoundManager.GetChordFreq("am7", 7);
+            var b = SoundManager.AutumnLeaves;
+            SoundPlayer.LoopTrack(b, 120, false);
+            //Console.Beep(a,100);
+            //Console.Beep(300, 100);
+
         }
 
     }

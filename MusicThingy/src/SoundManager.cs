@@ -1,4 +1,5 @@
-﻿using MusicThingy.src;
+﻿using Microsoft.VisualBasic.CompilerServices;
+using MusicThingy.src;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,14 +27,17 @@ namespace MusicThingy
             { ScaleType.PENTATONIC_MAJOR, "0,4,5,7,11" }
         };
 
-        public static readonly string[] AutumnLeaves = { "am7","d7", "gmaj7","cmaj7","f#m7b5","b7","em","e7" };
-        public static readonly string[] Blues = { "a7","a7", "a7","a7","d7","d7","a7","a7","e7","d7","a7","e7"};
-        public static readonly string[] SimpleCMaj = { "c", "am", "f", "g" };
+        public static readonly string AutumnLeaves = "am7,d7,gmaj7,cmaj7,f#m7b5,b7,em,e7";
+        public static readonly string Blues = "a7,a7,a7,a7,d7,d7,a7,a7,e7,d7,a7,e7";
+        public static readonly string SimpleCMaj = "c,am,f,g";
+        public static readonly string HallOfMountainKing = "a,b,c,d,e,c,e,$,d#,b,d#,d,a#,d,$,a,b,c,d,e,c,e,a,g,e,c,e,g,$,$";
 
         // lowest note
         const float cMinimum = 65.41f;
         // default octave
-        public const int defaultOctave = 3;
+        const int defaultOctave = 3;
+        // highest octave needed an average human can hear (arbitrary)
+        const int highestOctave = 6;
         // random for improvising
         static Random rnd = new Random();
 
@@ -58,6 +62,11 @@ namespace MusicThingy
             // number of half steps forward from cMinimum
             int N = 0;
 
+            if (note.Length == 1 && note[0] == '$')
+            {
+                // lowest possible freq for stop
+                return 37;
+            }
             if (Char.ToLower(note[0]) == 'c')
             {
                 N = 0;
@@ -97,13 +106,33 @@ namespace MusicThingy
             return (int)(cMinimum * Math.Pow(2, (float)(12 * octave + N) / 12));
         }
         /// <summary>
+        /// Return frequency of note using pitch 'direction'
+        /// </summary>
+        /// <param name="note"></param>
+        /// <param name="lastFreq"></param>
+        /// <param name="pitchUp"></param>
+        /// <param name="octave"></param>
+        /// <returns></returns>
+        public static int GetNoteDirectionlFreq(string note, int lastFreq, bool pitchUp)
+        {
+            int octave = pitchUp?0:highestOctave;
+            int tmpNote = GetNoteFreq(note, octave);
+            while (pitchUp ? (tmpNote < lastFreq) : (tmpNote > lastFreq)) 
+            {
+                octave += pitchUp ? 1 : -1;
+                tmpNote = GetNoteFreq(note, octave);
+            } 
+            return tmpNote;
+        }
+        /// <summary>
         /// Return frequency using offset from any 'N' existing frequency
+        /// !! Should not have octaves in it as it's relative !!
         /// </summary>
         /// <param name="freq"></param>
         /// <param name="octave"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        public static int GetOffsetFreq(int freq, int octave, int offset) => (int)(freq * Math.Pow(2, (float)offset/12));
+        public static int GetOffsetFreq(int freq, int offset) => (int)(freq * Math.Pow(2, (float)(offset) / 12));
         /// <summary>
         /// Return frequency of chord using standard chord symbolizations
         /// </summary>
@@ -114,14 +143,14 @@ namespace MusicThingy
         {
             if (chord.Length > 6 || chord.Length < 1) throw new SyntaxErrorException("chord = 'char' + (null/#) + (null/maj7,m7,m7b5,7,m)");
 
-            int rootFreq = 0;
+            int rootFreq;
             if (chord.Length > 1 && chord[1] == '#')
             {
-                rootFreq = GetNoteFreq(chord[0].ToString() + chord[1].ToString());
+                rootFreq = GetNoteFreq(chord[0].ToString() + chord[1].ToString(), octave);
             }
             else
             {
-                rootFreq = GetNoteFreq(chord[0].ToString());
+                rootFreq = GetNoteFreq(chord[0].ToString(), octave);
             }
 
             if (chord.Contains("maj7")) return GetChordFreq(rootFreq, ChordType.MajorSeven);
@@ -138,19 +167,38 @@ namespace MusicThingy
        /// <param name="chordType"></param>
        /// <param name="octave"></param>
        /// <returns></returns>
-        public static int GetChordFreq(int rootFreq, ChordType chordType, int octave = defaultOctave)
+        public static int GetChordFreq(int rootFreq, ChordType chordType)
         {
             int chordFreq = 0;
             // array to store each of the chord's notes' intervals
             int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
-            Console.WriteLine(string.Join(",",intervals));
+            //Console.WriteLine(string.Join(",",intervals));
             chordFreq = rootFreq;
             for (int i = 1; i < intervals.Length; i++)
             {
-                int tmp = GetOffsetFreq(rootFreq, octave, intervals[i]);
-                chordFreq = Math.Abs(chordFreq - tmp);
+                int tmp = GetOffsetFreq(rootFreq, intervals[i]);
+                chordFreq = Math.Abs((chordFreq - tmp));
             }
             return chordFreq;
+        }
+        /// <summary>
+        /// Returns frequency of a chord using pitch 'direction'
+        /// </summary>
+        /// <param name="chord"></param>
+        /// <param name="lastChordFreq"></param>
+        /// <param name="pitchUp"></param>
+        /// <param name="octave"></param>
+        /// <returns></returns>
+        public static int GetChordDirectionalFreq(string chord, int lastChordFreq, bool pitchUp)
+        {
+            int octave = pitchUp?0:highestOctave;
+            int tmpChordFreq = GetChordFreq(chord, octave);
+            while (pitchUp ? (tmpChordFreq < lastChordFreq) : (tmpChordFreq > lastChordFreq))
+            {
+                octave += pitchUp ? 1 : -1;
+                tmpChordFreq = GetChordFreq(chord, octave);
+            }
+            return tmpChordFreq;
         }
         /// <summary>
         /// Return an array of note frequencies of the chord's notes
@@ -159,14 +207,14 @@ namespace MusicThingy
         /// <param name="chordType"></param>
         /// <param name="octave"></param>
         /// <returns></returns>
-        public static int[] GetChordNotesFreq(int rootFreq, ChordType chordType, int octave = defaultOctave)
+        public static int[] GetChordNotesFreq(int rootFreq, ChordType chordType)
         {
             // array to store each of the chord's notes' intervals and override with note frequencies
             int[] intervals = chordIntervals[chordType].Split(",").Select(Int32.Parse).ToArray();
             intervals[0] = rootFreq;
             for (int i = 1; i < intervals.Length; i++)
             {
-                intervals[i] = GetOffsetFreq(rootFreq, octave, intervals[i]);
+                intervals[i] = GetOffsetFreq(rootFreq, intervals[i]);
             }
             return intervals;
         }
@@ -178,9 +226,9 @@ namespace MusicThingy
         /// <param name="scaleType"></param>
         /// <param name="octave"></param>
         /// <returns></returns>
-        public static int[] GetScaleNotesFreq(string root, ScaleType scaleType, int octave = defaultOctave)
+        public static int[] GetScaleNotesFreq(string root, ScaleType scaleType)
         {
-           return GetScaleNotesFreq(GetNoteFreq(root), scaleType, defaultOctave);
+           return GetScaleNotesFreq(GetNoteFreq(root), scaleType);
         }
         /// <summary>
         /// Return an array of note frequencies of the scale's notes using frequencies
@@ -189,14 +237,14 @@ namespace MusicThingy
         /// <param name="scaleType"></param>
         /// <param name="octave"></param>
         /// <returns></returns>
-        public static int[] GetScaleNotesFreq(int rootFreq, ScaleType scaleType, int octave = defaultOctave)
+        public static int[] GetScaleNotesFreq(int rootFreq, ScaleType scaleType)
         {
             // array to store each of the scale's notes' intervals and override with scale notes frequencies
             int[] intervals = scaleIntervals[scaleType].Split(",").Select(Int32.Parse).ToArray();
             intervals[0] = rootFreq;
             for (int i = 1; i < intervals.Length; i++)
             {
-                intervals[i] = GetOffsetFreq(rootFreq, octave, intervals[i]);
+                intervals[i] = GetOffsetFreq(rootFreq, intervals[i]);
             }
             return intervals;
         }
